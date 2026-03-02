@@ -1,0 +1,34 @@
+# Ambiente
+.env
+.env.local
+.env.*.local
+
+# Dependências
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Build
+dist/
+build/
+.next/
+out/
+
+# Cache PDFs local
+tmp/
+*.pdf
+
+# IDEs
+.vscode/settings.json
+.idea/
+*.swp
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
