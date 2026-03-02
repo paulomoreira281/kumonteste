@@ -624,12 +624,30 @@ def _questao_vf(q: QuestionData, estilos) -> Table:
     return t
 
 
+def _carregar_imagem_url(url: str, larg: float, alt: float):
+    """Baixa imagem de URL e retorna RLImage ou None em caso de falha."""
+    try:
+        import httpx, io as _io
+        from reportlab.platypus import Image as RLImage
+        r = httpx.get(url, timeout=8, follow_redirects=True)
+        r.raise_for_status()
+        buf = _io.BytesIO(r.content)
+        return RLImage(buf, width=larg, height=alt, kind="proportional")
+    except Exception:
+        return None
+
+
 def _questao_ie(q: QuestionData, col_w: float, estilos) -> Table:
     """Questão tipo IE — imagem + escrita."""
-    # Placeholder visual de imagem
     img_larg = col_w - 28
-    img_alt = 45
-    campos = [RetanguloImagem(largura=img_larg, altura=img_alt, cor=HexColor("#bdbdbd")), Spacer(1, 4)]
+    img_alt = 50
+
+    # Tenta usar imagem real; cai no placeholder se não houver
+    img_elem = None
+    if q.imagem_path:
+        img_elem = _carregar_imagem_url(q.imagem_path, img_larg, img_alt)
+
+    campos = [img_elem if img_elem else RetanguloImagem(largura=img_larg, altura=img_alt), Spacer(1, 4)]
     for label in ["Nome:", "Silabas:", "Tonica:"]:
         campos.append(Paragraph(
             f'<font color="#90a4ae" size="7"><b>{label}</b></font>',

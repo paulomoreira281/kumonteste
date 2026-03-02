@@ -176,6 +176,16 @@ def _get_supabase():
     return create_client(s.supabase_url, s.supabase_service_role_key)
 
 
+def _image_url(file_path: str) -> str:
+    """Gera URL pública do Supabase Storage a partir do file_path."""
+    from config import get_settings
+    s = get_settings()
+    bucket = s.storage_bucket_assets
+    # URL pública: {supabase_url}/storage/v1/object/public/{bucket}/{file_path}
+    base = s.supabase_url.rstrip("/")
+    return f"{base}/storage/v1/object/public/{bucket}/{file_path.lstrip('/')}"
+
+
 def _row_to_question(row: dict, numero: int) -> QuestionData:
     """Converte uma linha do Supabase em QuestionData."""
     content = row.get("content", {})
@@ -190,11 +200,17 @@ def _row_to_question(row: dict, numero: int) -> QuestionData:
         enunciado = content.get("stem", "")
         opcoes = content.get("options", [])
     elif tipo == "IE":
-        enunciado = content.get("stem", "Observe a imagem e escreva o nome")
+        enunciado = content.get("instruction", content.get("stem", "Observe a imagem e escreva o nome"))
         opcoes = []
     else:
         enunciado = content.get("stem", "")
         opcoes = content.get("options", [])
+
+    # URL da imagem (disponível quando busca via v_available_questions)
+    imagem_url = None
+    image_path = row.get("image_path")
+    if image_path:
+        imagem_url = _image_url(image_path)
 
     return QuestionData(
         numero=numero,
@@ -203,6 +219,7 @@ def _row_to_question(row: dict, numero: int) -> QuestionData:
         opcoes=opcoes,
         resposta=row.get("correct_answer", ""),
         guiado=row.get("is_guided", False),
+        imagem_path=imagem_url,
     )
 
 
@@ -300,16 +317,15 @@ def _buscar_conteudo(nivel: int, serie: str, modulo: str) -> dict:
     Busca questões do Supabase para os blocos 1, 3 e 4.
     Fallback para hardcoded nos níveis 1-2 se o banco estiver vazio.
     """
-    # Tenta buscar do Supabase
+    # Tenta buscar do Supabase via view (inclui image_path para questões IE)
     try:
         sb = _get_supabase()
         result = (
-            sb.table("questions")
+            sb.table("v_available_questions")
             .select("*")
             .eq("module", modulo)
             .eq("level", nivel)
             .eq("series", serie)
-            .eq("active", True)
             .order("block")
             .order("id")
             .execute()
