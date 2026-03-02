@@ -291,7 +291,7 @@ def _rodape(modulo_label: str, nivel: int, serie: str, pagina: str, total: str, 
 def _bloco1_prepare_se(questoes: list[QuestionData], estilos) -> list:
     """Bloco 1 — Prepare-se: exercícios de aquecimento em grid."""
     elementos = []
-    elementos.append(_titulo_bloco(1, "⚡", "Prepare-se",
+    elementos.append(_titulo_bloco(1, "*", "Prepare-se",
                                    AMARELO_BG, HexColor("#5d4037"), AMARELO))
     elementos.append(Spacer(1, 3))
 
@@ -350,7 +350,7 @@ def _bloco2_licao(titulo: str, narrativa: str, exemplos: list[ExemploData],
                   imagem_path: Optional[str], estilos) -> list:
     """Bloco 2 — Lição: narrativa + ilustração + exemplos resolvidos."""
     elementos = []
-    elementos.append(_titulo_bloco(2, "📖", f"Lição — \"{titulo}\"",
+    elementos.append(_titulo_bloco(2, "L", f"Lição — \"{titulo}\"",
                                    VERDE_MENTA, VERDE, VERDE_CLARO))
     elementos.append(Spacer(1, 3))
 
@@ -363,7 +363,7 @@ def _bloco2_licao(titulo: str, narrativa: str, exemplos: list[ExemploData],
     # Exemplos resolvidos
     exemplos_elementos = []
     exemplos_elementos.append(Paragraph(
-        "<b>✏️ Exemplos resolvidos:</b>",
+        "<b>Exemplos resolvidos:</b>",
         ParagraphStyle("ex_titulo", fontSize=8.5, fontName="Helvetica-Bold",
                        textColor=VERDE, spaceAfter=4)
     ))
@@ -396,11 +396,10 @@ def _bloco2_licao(titulo: str, narrativa: str, exemplos: list[ExemploData],
         img = RLImage(imagem_path, width=28*mm, height=28*mm, kind="proportional")
         col_dir = [img]
     else:
-        # Placeholder SVG/texto quando imagem não disponível
+        # Placeholder quando imagem não disponível
         col_dir = [
             Table(
-                [[Paragraph("🖼️", ParagraphStyle("ph", fontSize=28, alignment=TA_CENTER)),
-                  Paragraph("<i>ilustração<br/>do nível</i>",
+                [[Paragraph("<i>ilustracao<br/>do nivel</i>",
                             ParagraphStyle("ph2", fontSize=7.5, textColor=CINZA,
                                           alignment=TA_CENTER))]],
                 colWidths=[28*mm],
@@ -438,7 +437,7 @@ def _bloco2_licao(titulo: str, narrativa: str, exemplos: list[ExemploData],
 def _bloco3_vamos_praticar(questoes: list[QuestionData], estilos) -> list:
     """Bloco 3 — Vamos Praticar!: exercícios guiados com gabarito de suporte."""
     elementos = []
-    elementos.append(_titulo_bloco(3, "🎯", "Vamos Praticar!",
+    elementos.append(_titulo_bloco(3, ">>", "Vamos Praticar!",
                                    AZUL_BG, AZUL, AZUL))
     elementos.append(Paragraph(
         "<b>Instrução:</b> Siga as orientações e confira as respostas na caixa abaixo.",
@@ -497,7 +496,7 @@ def _bloco3_vamos_praticar(questoes: list[QuestionData], estilos) -> list:
     respostas_txt = "  |  ".join([q.resposta for q in questoes if q.resposta])
     elementos.append(Spacer(1, 4))
     hint = Table([[
-        Paragraph("⭐", ParagraphStyle("star", fontSize=11)),
+        Paragraph("*", ParagraphStyle("star", fontSize=11, fontName="Helvetica-Bold", textColor=AMARELO)),
         Paragraph(f"<b>Respostas:</b>  "
                   f'<font color="#2e7d32">{respostas_txt}</font>',
                   ParagraphStyle("hint_txt", fontSize=8, fontName="Helvetica")),
@@ -567,7 +566,7 @@ def _questao_vf(q: QuestionData, estilos) -> Table:
     )
     t = Table(
         [[num_cell, afirmacao, opcoes]],
-        colWidths=[22, CONTENT_W - 22 - 60, 60],
+        colWidths=[28, CONTENT_W - 28 - 60, 60],
     )
     t.setStyle(TableStyle([
         ("BACKGROUND",   (0,0), (-1,-1), white),
@@ -586,7 +585,7 @@ def _questao_ie(q: QuestionData, col_w: float, estilos) -> Table:
     """Questão tipo IE — imagem + escrita."""
     # Placeholder de imagem (em produção: carregar do Storage)
     img_cell = Paragraph(
-        "🖼️", ParagraphStyle("ie_img", fontSize=24, alignment=TA_CENTER)
+        "[imagem]", ParagraphStyle("ie_img", fontSize=9, textColor=CINZA, alignment=TA_CENTER)
     )
     campos = [img_cell]
     for label in ["Nome:", "Sílabas:", "Tônica:"]:
@@ -635,7 +634,7 @@ def _subtitulo_atividade(codigo: str, descricao: str) -> Table:
 def _bloco4_pratica(questoes: list[QuestionData], estilos) -> list:
     """Bloco 4 — Prática: exercícios livres agrupados por tipo."""
     elementos = []
-    elementos.append(_titulo_bloco(4, "✍️", "Prática",
+    elementos.append(_titulo_bloco(4, "P", "Pratica",
                                    ROSA_BG, HexColor("#880e4f"), ROSA))
     elementos.append(Spacer(1, 3))
 
@@ -737,7 +736,7 @@ def _pagina_gabarito(params: FichaParams, estilos) -> list:
 
     # Cabeçalho gabarito
     elementos.append(Paragraph(
-        f"🔑 Gabarito — Modo Professor",
+        f"Gabarito - Modo Professor",
         ParagraphStyle("gab_h", fontSize=14, fontName="Helvetica-Bold",
                        textColor=CINZA, alignment=TA_CENTER)
     ))
@@ -751,10 +750,10 @@ def _pagina_gabarito(params: FichaParams, estilos) -> list:
 
     # Aviso
     aviso = Table([[
-        Paragraph("⚠️", ParagraphStyle("av_icon", fontSize=11)),
+        Paragraph("!", ParagraphStyle("av_icon", fontSize=11, fontName="Helvetica-Bold", textColor=AMARELO)),
         Paragraph(
-            "<b>Esta página é exclusiva para o professor ou responsável.</b> "
-            "Não inclua na cópia do aluno ao imprimir.",
+            "<b>Esta pagina e exclusiva para o professor ou responsavel.</b> "
+            "Nao inclua na copia do aluno ao imprimir.",
             ParagraphStyle("av_txt", fontSize=8.5, fontName="Helvetica")
         ),
     ]], colWidths=[18, CONTENT_W - 18])
