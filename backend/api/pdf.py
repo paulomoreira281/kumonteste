@@ -310,7 +310,7 @@ def _bloco1_prepare_se(questoes: list[QuestionData], estilos) -> list:
                 "prep_inst", fontSize=7.5, textColor=CINZA,
                 alignment=TA_CENTER, leading=10
             )),
-            HRFlowable(width=col_w - 16, color=AMARELO, thickness=1, spaceAfter=2, spaceBefore=4, lineCap="round"),
+            HRFlowable(width=col_w - 16, color=AMARELO, thickness=1, spaceAfter=14, spaceBefore=4, lineCap="round"),
         ]
         cell = Table([[cell_content]], colWidths=[col_w - 4])
         cell.setStyle(TableStyle([
@@ -467,7 +467,7 @@ def _bloco3_vamos_praticar(questoes: list[QuestionData], estilos) -> list:
             ))
             cell_items.append(HRFlowable(
                 width=col_w - 16, color=HexColor("#64b5f6"),
-                thickness=1, spaceAfter=3, spaceBefore=1, lineCap="round"
+                thickness=1, spaceAfter=14, spaceBefore=1, lineCap="round"
             ))
 
         c = Table([[cell_items]], colWidths=[col_w - 4])
@@ -536,7 +536,7 @@ def _questao_ds(q: QuestionData, col_w: float, estilos) -> Table:
         ))
         items.append(HRFlowable(
             width=col_w - 14, color=HexColor("#bdbdbd"),
-            thickness=1, spaceAfter=3, spaceBefore=1
+            thickness=1, spaceAfter=14, spaceBefore=1
         ))
 
     c = Table([[items]], colWidths=[col_w - 4])
@@ -596,7 +596,7 @@ def _questao_ie(q: QuestionData, col_w: float, estilos) -> Table:
         ))
         campos.append(HRFlowable(
             width=col_w - 16, color=HexColor("#bdbdbd"),
-            thickness=1, spaceAfter=2, spaceBefore=1
+            thickness=1, spaceAfter=14, spaceBefore=1
         ))
 
     c = Table([[campos]], colWidths=[col_w - 4])

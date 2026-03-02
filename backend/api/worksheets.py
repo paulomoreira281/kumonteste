@@ -176,9 +176,10 @@ def _buscar_conteudo(nivel: int, serie: str, modulo: str) -> dict:
     """
     chave = nivel
     if chave not in CONTEUDO_NIVEIS:
-        # Fallback: usar nível 1 como template genérico
-        logger.warning(f"Nível {nivel} não encontrado, usando nível 1 como fallback")
-        chave = 1
+        raise HTTPException(
+            status_code=404,
+            detail=f"Nível {nivel} ainda não possui conteúdo cadastrado. Níveis disponíveis: {sorted(CONTEUDO_NIVEIS.keys())}"
+        )
 
     dados = CONTEUDO_NIVEIS[chave]
 
