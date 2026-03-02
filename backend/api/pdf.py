@@ -171,6 +171,33 @@ def _estilos():
     }
 
 
+# ── Flowable: retângulo placeholder para imagem ───────────
+class RetanguloImagem(Flowable):
+    """Desenha um retângulo pontilhado como placeholder de imagem."""
+    def __init__(self, largura=50, altura=45, cor=None):
+        self._larg = largura
+        self._alt = altura
+        self._cor = cor or HexColor("#bdbdbd")
+        super().__init__()
+
+    def wrap(self, availW, availH):
+        return self._larg, self._alt
+
+    def draw(self):
+        self.canv.setStrokeColor(self._cor)
+        self.canv.setFillColor(HexColor("#f5f5f5"))
+        self.canv.setLineWidth(1.2)
+        self.canv.setDash(3, 3)
+        self.canv.roundRect(0, 0, self._larg, self._alt, 4, fill=True, stroke=True)
+        self.canv.setDash()
+        self.canv.setFillColor(HexColor("#9e9e9e"))
+        self.canv.setFont("Helvetica", 7)
+        cx = self._larg / 2
+        cy = self._alt / 2
+        self.canv.drawCentredString(cx, cy + 4, "imagem")
+        self.canv.drawCentredString(cx, cy - 5, "aqui")
+
+
 # ── Flowable: linha horizontal colorida ───────────────────
 class LinhaColorida(Flowable):
     def __init__(self, cor, largura=None, espessura=1.2, tracejado=False):
@@ -301,12 +328,28 @@ def _bloco1_prepare_se(questoes: list[QuestionData], estilos) -> list:
     linha_atual = []
 
     for i, q in enumerate(questoes):
+        # Palavra/enunciado principal — DS usa opcoes[0], outros usam enunciado
+        palavra = q.opcoes[0] if q.tipo == "DS" and q.opcoes else q.enunciado
+        # Instrução secundária
+        inst = ""
+        if q.tipo == "DS":
+            inst = q.enunciado or "Sílabas / Tônica:"
+        elif q.tipo == "VF":
+            inst = "( V )  ( F )"
+        elif q.tipo == "MC":
+            inst = q.opcoes[0] if q.opcoes else "Alternativa:"
+        elif q.tipo == "CL":
+            inst = "Complete:"
+        else:
+            inst = "Resposta:"
+
         cell_content = [
-            Paragraph(f"<b>{q.enunciado}</b>", ParagraphStyle(
-                "prep_word", fontSize=11, fontName="Helvetica-Bold",
-                textColor=LARANJA, alignment=TA_CENTER, leading=14
+            Paragraph(f"<b>{palavra}</b>", ParagraphStyle(
+                "prep_word", fontSize=10, fontName="Helvetica-Bold",
+                textColor=LARANJA, alignment=TA_CENTER, leading=13,
+                spaceAfter=2,
             )),
-            Paragraph(q.opcoes[0] if q.opcoes else "Resposta:", ParagraphStyle(
+            Paragraph(inst, ParagraphStyle(
                 "prep_inst", fontSize=7.5, textColor=CINZA,
                 alignment=TA_CENTER, leading=10
             )),
@@ -528,14 +571,14 @@ def _questao_ds(q: QuestionData, col_w: float, estilos) -> Table:
             alignment=TA_CENTER, spaceAfter=3
         )),
     ]
-    for label in ["Sílabas:", "Tônica:"]:
+    for label in ["Silabas:", "Tonica:"]:
         items.append(Paragraph(
             f'<font color="#90a4ae" size="7"><b>{label}</b></font>',
             ParagraphStyle("ds_lbl", fontSize=7)
         ))
         items.append(HRFlowable(
             width=col_w - 14, color=HexColor("#bdbdbd"),
-            thickness=1, spaceAfter=14, spaceBefore=1
+            thickness=1, spaceAfter=16, spaceBefore=1
         ))
 
     c = Table([[items]], colWidths=[col_w - 4])
@@ -583,12 +626,11 @@ def _questao_vf(q: QuestionData, estilos) -> Table:
 
 def _questao_ie(q: QuestionData, col_w: float, estilos) -> Table:
     """Questão tipo IE — imagem + escrita."""
-    # Placeholder de imagem (em produção: carregar do Storage)
-    img_cell = Paragraph(
-        "[imagem]", ParagraphStyle("ie_img", fontSize=9, textColor=CINZA, alignment=TA_CENTER)
-    )
-    campos = [img_cell]
-    for label in ["Nome:", "Sílabas:", "Tônica:"]:
+    # Placeholder visual de imagem
+    img_larg = col_w - 28
+    img_alt = 45
+    campos = [RetanguloImagem(largura=img_larg, altura=img_alt, cor=HexColor("#bdbdbd")), Spacer(1, 4)]
+    for label in ["Nome:", "Silabas:", "Tonica:"]:
         campos.append(Paragraph(
             f'<font color="#90a4ae" size="7"><b>{label}</b></font>',
             ParagraphStyle("ie_lbl", fontSize=7)
@@ -699,13 +741,13 @@ def _bloco4_pratica(questoes: list[QuestionData], estilos) -> list:
             elementos.append(grid_ie)
 
         else:
-            # Questões genéricas (MC, CL, RF...)
+            # Questões genéricas (MC, CL, RF, PG...)
             for q in qs:
                 num = q.numero
                 enunciado = Paragraph(
                     f'<b>{num}.</b> {q.enunciado}',
                     ParagraphStyle("gen_enum", fontSize=9, fontName="Helvetica",
-                                   spaceAfter=2)
+                                   spaceAfter=3)
                 )
                 elementos.append(enunciado)
                 if q.tipo == "MC" and q.opcoes:
@@ -714,10 +756,25 @@ def _bloco4_pratica(questoes: list[QuestionData], estilos) -> list:
                             f"   {op}",
                             ParagraphStyle("mc_op", fontSize=9, leftIndent=16)
                         ))
-                elementos.append(HRFlowable(
-                    width=CONTENT_W, color=CINZA_BORDA,
-                    thickness=0.8, spaceAfter=4, spaceBefore=2
-                ))
+                    # Linha de resposta após opções MC
+                    elementos.append(Spacer(1, 2))
+                    elementos.append(HRFlowable(
+                        width=CONTENT_W * 0.5, color=CINZA_BORDA,
+                        thickness=0.8, spaceAfter=8, spaceBefore=2
+                    ))
+                elif q.tipo in ("CL", "RF", "PG"):
+                    # Linhas de escrita generosas para completar/reescrever
+                    for _ in range(2):
+                        elementos.append(HRFlowable(
+                            width=CONTENT_W, color=CINZA_BORDA,
+                            thickness=0.8, spaceAfter=12, spaceBefore=2
+                        ))
+                else:
+                    # Linha simples para outros tipos
+                    elementos.append(HRFlowable(
+                        width=CONTENT_W, color=CINZA_BORDA,
+                        thickness=0.8, spaceAfter=8, spaceBefore=2
+                    ))
 
         elementos.append(Spacer(1, 4))
     return elementos
